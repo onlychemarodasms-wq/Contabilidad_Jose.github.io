@@ -1,0 +1,888 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0}</style></head><body><title>Contabilidad Administrativa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Concepto: libro mayor con un borde de tejido guatemalteco. Azul y rojo UMG; rojo solo para acciones y alertas. */
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --ink:#0B1630; --muted:#3A4968; --line:#D5DDEC; --soft:#EEF3FC;
+  --blue:#0B3A8C; --blue-2:#2A62C9; --accent:#C8102E; --red-text:#C8102E;
+  --hero:#0B2E73; --hero-ink:#FFFFFF; --hero-muted:#D3DDF5;
+  --good:#146B38; --good-bg:#E1F4E8; --warn:#8A3F04; --warn-bg:#FDEBD5; --bad:#B3122B; --bad-bg:#FBE2E7;
+  --amber:#D98A1F;
+  --f-head:'Space Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-num:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:1.1rem; line-height:1.7; padding-block:0}
+body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:30; background:var(--surface)}
+h1,h2,h3{font-family:var(--f-head); line-height:1.15; margin:0; text-wrap:balance}
+p{margin:0 0 1em}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--blue-2); outline-offset:2px; border-radius:4px}
+.wrap{max-width:1120px; margin-inline:auto; padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-num); font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.82rem; letter-spacing:.09em; text-transform:uppercase; font-weight:600; color:var(--red-text); margin-bottom:.7rem}
+
+/* Borde inspirado en el tejido guatemalteco */
+.tzute{height:14px; background:#0B2E73 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Crect width='28' height='14' fill='%230B2E73'/%3E%3Cpath d='M14 1 21 7 14 13 7 7Z' fill='%23C8102E'/%3E%3Cpath d='M0 1 7 7 0 13ZM28 1 21 7 28 13Z' fill='%23C8102E'/%3E%3Cpath d='M14 4.6 16.4 7 14 9.4 11.6 7Z' fill='%23FFFFFF'/%3E%3C/svg%3E") repeat-x left center}
+
+/* Encabezado */
+.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:40; background:var(--surface); border-bottom:1px solid var(--line)}
+.top .wrap{display:flex; align-items:center; gap:1.25rem; min-height:60px; flex-wrap:wrap; padding-block:6px}
+.brand{display:flex; align-items:center; gap:.6rem; font-family:var(--f-head); font-weight:700; font-size:1.05rem; color:var(--ink); text-decoration:none; white-space:nowrap}
+.mark{width:26px; height:26px; display:grid; grid-template-columns:1fr 1fr; border-radius:3px; overflow:hidden}
+.mark i{display:block} .mark i:first-child{background:var(--blue)} .mark i:last-child{background:var(--red-text)}
+.nav{display:flex; gap:.2rem; overflow-x:auto; margin-left:auto; min-width:0; scrollbar-width:thin}
+.nav a{padding:.45rem .75rem; border-radius:6px; text-decoration:none; color:var(--muted); font-size:.95rem; font-weight:500; white-space:nowrap}
+.nav a:hover{background:var(--soft); color:var(--ink)}
+
+/* Portada */
+.hero{background:var(--hero); color:var(--hero-ink)}
+.hero .wrap{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr); gap:3rem; align-items:center; padding-block:4rem}
+.hero .eyebrow{color:#FFB3BE}
+.hero h1{font-size:clamp(2.4rem,5.4vw,3.9rem); font-weight:700; letter-spacing:-.02em}
+.hero p.lead{color:var(--hero-muted); font-size:1.2rem; max-width:33em; margin-top:1.1rem; line-height:1.65}
+.cta{display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1.8rem}
+.btn{font:inherit; font-weight:600; font-size:1rem; padding:.75rem 1.3rem; border-radius:8px; border:1.5px solid transparent; cursor:pointer; text-decoration:none; display:inline-block}
+.btn.primary{background:var(--accent); color:#fff}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.ghost{border-color:rgba(255,255,255,.55); color:#fff; background:transparent}
+.btn.ghost:hover{background:rgba(255,255,255,.12)}
+.btn.line{border-color:var(--line); background:var(--surface); color:var(--ink)}
+.btn.line:hover{background:var(--soft)}
+.btn[disabled]{opacity:.45; cursor:not-allowed}
+
+/* Secciones */
+section.band{padding-block:4.5rem}
+section.band.alt{background:var(--surface); border-block:1px solid var(--line)}
+.sec-head{max-width:44rem; margin-bottom:2.25rem}
+.sec-head h2{font-size:clamp(1.9rem,3.6vw,2.6rem); letter-spacing:-.015em}
+.sec-head p{color:var(--muted); margin-top:.8rem; font-size:1.15rem}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:1.5rem 1.6rem; min-width:0}
+.alt .card{background:var(--bg)}
+h3{font-size:1.35rem; margin-bottom:.7rem}
+h4{font-family:var(--f-head); font-size:1.08rem; margin:0 0 .45rem}
+.cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr)); gap:1.5rem}
+.sub-title{font-size:1.5rem; margin:3rem 0 1.1rem}
+
+/* Lista tipo libro */
+.ledger{margin:0; border-top:2px solid var(--ink)}
+.ledger .r{display:grid; grid-template-columns:minmax(160px,.3fr) 1fr; gap:1.5rem; padding:1.05rem .3rem; border-bottom:1px solid var(--line)}
+.ledger dt{font-family:var(--f-head); font-weight:700; margin:0}
+.ledger dd{margin:0; color:var(--muted)}
+.ledger dd strong{color:var(--ink); font-weight:600}
+.ledger dd .go{display:block; margin-top:.3rem; color:var(--blue); font-weight:600; font-size:.95rem}
+
+/* Teoría */
+.bullets{margin:0; padding-left:1.2rem} .bullets li{margin-bottom:.55rem}
+.bullets li::marker{color:var(--red-text)}
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; min-width:720px; font-size:1rem; line-height:1.55}
+th,td{text-align:left; padding:.85rem 1rem; border-bottom:1px solid var(--line); vertical-align:top}
+thead th{background:var(--blue); color:#fff; font-family:var(--f-head); font-weight:600; font-size:.95rem}
+tbody th{font-weight:600; background:var(--soft); width:18%; color:var(--ink)}
+tbody tr:last-child th, tbody tr:last-child td{border-bottom:0}
+.note{font-size:.95rem; color:var(--muted)}
+.gt{margin-top:1.2rem; padding:.9rem 1.1rem; border-left:5px solid var(--red-text); background:var(--soft); border-radius:0 9px 9px 0; font-size:1rem; line-height:1.6}
+.gt b{font-family:var(--f-head); display:block; font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; color:var(--red-text); margin-bottom:.2rem}
+
+/* Pestañas */
+.tabs{display:flex; gap:.3rem; overflow-x:auto; border-bottom:2px solid var(--line); margin-bottom:1.75rem; scrollbar-width:thin}
+.tabs button{font:inherit; font-weight:600; font-size:1rem; background:none; border:0; padding:.8rem 1.1rem; color:var(--muted); cursor:pointer; white-space:nowrap; border-bottom:3px solid transparent; margin-bottom:-2px}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--blue); border-bottom-color:var(--accent)}
+.tool{display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:2.5rem; align-items:start}
+.tool .explain{min-width:0}
+.tool .explain h3{font-size:1.6rem}
+.formula{font-family:var(--f-num); background:var(--soft); border-radius:9px; padding:.8rem 1rem; font-size:.9rem; margin:.5rem 0 1.2rem; overflow-x:auto; white-space:pre; line-height:1.8}
+.calc{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.5rem; min-width:0}
+.alt .calc{background:var(--bg)}
+.calc h4{font-size:.82rem; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); margin-bottom:.5rem}
+.case{font-size:1rem; margin:0 0 1.1rem; color:var(--ink)}
+.case b{color:var(--blue)}
+.fields{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:.95rem}
+.field{min-width:0}
+.field label{display:block; font-size:.88rem; color:var(--muted); font-weight:500; margin-bottom:.3rem; line-height:1.35}
+.inp{display:flex; align-items:center; border:1.5px solid var(--line); border-radius:8px; background:var(--surface); overflow:hidden}
+.inp:focus-within{border-color:var(--blue-2)}
+.inp span{padding-inline:.65rem; color:var(--muted); font-family:var(--f-num); font-size:.9rem; background:var(--soft); align-self:stretch; display:flex; align-items:center}
+.inp input{border:0; background:transparent; color:var(--ink); font:inherit; font-family:var(--f-num); font-size:1rem; padding:.6rem .65rem; width:100%; min-width:0; outline:0}
+.sub{font-family:var(--f-head); font-size:.98rem; font-weight:700; margin:1.3rem 0 .6rem; color:var(--blue)}
+.row-btns{display:flex; gap:.6rem; margin-top:.9rem; flex-wrap:wrap}
+.out{margin-top:1.5rem; border-top:2px solid var(--ink); padding-top:1.2rem}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:.8rem; margin-bottom:1.1rem}
+.kpi{background:var(--soft); border-radius:10px; padding:.85rem .95rem; display:flex; flex-direction:column; gap:.15rem; min-width:0}
+.k-l{font-size:.82rem; color:var(--muted); font-weight:500}
+.k-v{font-family:var(--f-num); font-size:1.45rem; font-weight:500; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; line-height:1.3}
+.k-s{font-size:.82rem; color:var(--muted)}
+.kpi.good{background:var(--good-bg)} .kpi.good .k-v{color:var(--good)}
+.kpi.bad{background:var(--bad-bg)} .kpi.bad .k-v{color:var(--bad)}
+.pill{display:inline-block; font-size:.84rem; font-weight:600; padding:.15rem .65rem; border-radius:99px}
+.pill.good{background:var(--good-bg); color:var(--good)} .pill.bad{background:var(--bad-bg); color:var(--bad)} .pill.warn{background:var(--warn-bg); color:var(--warn)}
+.verdict{padding:1rem 1.15rem; border-radius:10px; font-size:1rem; line-height:1.55; margin-bottom:1.1rem; border-left:5px solid}
+.verdict.good{background:var(--good-bg); border-color:var(--good)} .verdict.bad{background:var(--bad-bg); border-color:var(--bad)} .verdict.warn{background:var(--warn-bg); border-color:var(--amber)}
+.verdict strong{display:block; margin-bottom:.15rem; font-size:1.05rem}
+.mini{min-width:0; font-size:.95rem}
+.mini th, .mini td{padding:.6rem .75rem}
+.mini thead th{font-size:.85rem}
+.mini td:nth-child(2), .mini td:nth-child(3){font-variant-numeric:tabular-nums}
+.mini td.m{font-family:var(--f-num); white-space:nowrap}
+.mini tr.tot td, .mini tr.tot th{font-weight:700; background:var(--soft)}
+.mini tbody th{width:auto}
+.chart{margin-top:.5rem; overflow-x:auto}
+.chart svg{display:block; width:100%; min-width:440px; height:auto}
+.chart .grid{stroke:var(--line); stroke-width:1}
+.chart .zero{stroke:var(--ink); stroke-width:1.3}
+.chart .tk{fill:var(--muted); font-family:var(--f-num); font-size:11.5px}
+.chart .curve{fill:none; stroke:var(--blue); stroke-width:2.8; stroke-linejoin:round}
+.chart .m-k{fill:var(--blue); stroke:var(--surface); stroke-width:2}
+.chart .m-t{fill:var(--red-text); stroke:var(--surface); stroke-width:2}
+.legend{display:flex; gap:1.2rem; flex-wrap:wrap; font-size:.9rem; color:var(--muted); margin-top:.5rem}
+.legend i{display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:.4rem}
+.bars{display:grid; gap:.8rem; margin-bottom:1.1rem}
+.bar-row{display:grid; grid-template-columns:minmax(120px,.35fr) 1fr; gap:.8rem; align-items:center; font-size:.95rem}
+.track{position:relative; height:28px; background:var(--soft); border-radius:5px}
+.track::after{content:""; position:absolute; left:50%; top:-3px; bottom:-3px; width:2px; background:var(--ink); opacity:.55}
+.fill{position:absolute; top:3px; bottom:3px; border-radius:3px}
+.fill.pos{background:var(--blue-2)} .fill.neg{background:var(--accent)}
+.bar-val{font-family:var(--f-num); font-size:.88rem; white-space:nowrap}
+.stack{display:flex; height:32px; border-radius:7px; overflow:hidden; margin:.3rem 0 .6rem; background:var(--soft)}
+.stack i{display:block; height:100%}
+.leg2{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:.35rem 1rem; font-size:.9rem; margin-bottom:1.1rem}
+.leg2 span{display:flex; align-items:center; gap:.45rem}
+.leg2 i{width:12px; height:12px; border-radius:3px; flex:none}
+
+/* Quiz */
+.q-card{max-width:46rem}
+.q-text{font-family:var(--f-head); font-size:1.35rem; font-weight:700; margin-bottom:1.1rem; line-height:1.3}
+.opts{display:grid; gap:.7rem}
+.opt{font:inherit; text-align:left; padding:.85rem 1.1rem; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); border-radius:10px; cursor:pointer}
+.opt:hover:not([disabled]){border-color:var(--blue-2); background:var(--soft)}
+.opt.ok{border-color:var(--good); background:var(--good-bg)}
+.opt.no{border-color:var(--bad); background:var(--bad-bg)}
+.opt[disabled]{cursor:default}
+.q-fb{margin:1rem 0; min-height:3.2em; font-size:1rem}
+.q-top{display:flex; justify-content:space-between; font-size:.92rem; color:var(--muted); margin-bottom:.9rem}
+
+.refs{margin:0; padding-left:1.2rem} .refs li{margin-bottom:.65rem}
+footer{background:var(--hero); color:var(--hero-muted); padding-block:2.4rem; font-size:1rem}
+footer strong{color:#fff}
+
+@media (max-width:860px){
+  body{font-size:1.05rem}
+  .hero .wrap{grid-template-columns:minmax(0,1fr); padding-block:2.75rem; gap:2rem}
+  .tool{grid-template-columns:minmax(0,1fr)}
+  .ledger .r{grid-template-columns:1fr; gap:.25rem}
+  .nav{order:3; width:100%; margin-left:0}
+  section.band{padding-block:3rem}
+  .bar-row{grid-template-columns:1fr}
+  .card{padding:1.25rem}
+}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{transition:none!important}}
+
+/* ---- Ajustes: fondo blanco, ilustraciones y calculadoras ---- */
+body,.hero,section.band.alt{background:#fff}
+.alt .card,.alt .calc{background:#fff}
+.hero{border-bottom:1px solid var(--line)}
+.hero,.hero .wrap{color:var(--ink)}
+.hero .eyebrow{color:var(--red-text)}
+.hero p.lead{color:var(--muted)}
+.btn.ghost{border-color:var(--blue); color:var(--blue)}
+.btn.ghost:hover{background:var(--soft)}
+.art{display:block; width:100%; height:auto; border-radius:16px; margin-bottom:1.3rem}
+.hero-art .art{margin:0; box-shadow:0 14px 34px rgba(11,58,140,.14)}
+.banner{margin-bottom:2rem}
+.banner .art{margin:0; min-width:560px}
+.banner{overflow-x:auto}
+.tabs{border-bottom:0; flex-wrap:wrap; gap:.5rem}
+.tabs button{border:1.5px solid var(--line); border-radius:99px; margin:0; background:#fff; padding:.6rem 1.1rem}
+.tabs button:hover{border-color:var(--blue-2)}
+.tabs button[aria-selected="true"]{background:var(--blue); color:#fff; border-color:var(--blue)}
+.calc{padding:0 1.6rem 1.7rem; border-radius:18px; overflow:hidden; box-shadow:0 12px 34px rgba(11,58,140,.12); border:1px solid var(--line)}
+.calc>h4{margin:0 -1.6rem 1.3rem; padding:.95rem 1.6rem; background:var(--blue); color:#fff; font-size:1rem; letter-spacing:.02em; text-transform:none; border-bottom:4px solid var(--accent)}
+.case{background:var(--soft); border-left:4px solid var(--blue-2); border-radius:0 10px 10px 0; padding:.75rem 1rem}
+.inp{border-radius:10px; border-width:1.5px; background:#fff; transition:border-color .15s, box-shadow .15s}
+.inp:focus-within{box-shadow:0 0 0 3px rgba(42,98,201,.2)}
+.inp span{background:var(--blue); color:#fff; min-width:2.4rem; justify-content:center; font-weight:500}
+.field label{font-weight:600; color:var(--ink)}
+.sub{padding-bottom:.4rem; border-bottom:1px solid var(--line)}
+.out{border-top:2px dashed var(--line)}
+.out::before{content:"Resultados"; display:block; font-family:var(--f-head); font-weight:700; font-size:1.15rem; color:var(--blue); margin-bottom:.9rem}
+.kpi{background:#fff; border:1px solid var(--line); border-top:4px solid var(--blue-2); box-shadow:0 2px 8px rgba(11,58,140,.06)}
+.kpi.good{background:var(--good-bg); border-top-color:var(--good)}
+.kpi.bad{background:var(--bad-bg); border-top-color:var(--bad)}
+.mini tbody th{background:var(--soft)}
+.mini tbody tr:nth-child(even) td{background:#F8FAFE}
+.qbar{height:8px; background:var(--soft); border-radius:99px; overflow:hidden; margin-bottom:1.2rem}
+.qbar i{display:block; height:100%; background:var(--accent); border-radius:99px; transition:width .3s}
+.q-card{max-width:48rem; box-shadow:0 12px 34px rgba(11,58,140,.10)}
+.q-note{margin-top:1rem; font-size:.95rem; color:var(--muted)}
+footer{background:#fff; color:var(--muted); border-top:1px solid var(--line)}
+footer strong{color:var(--ink)}
+section[id]{scroll-margin-top:110px}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio"><span class="mark" aria-hidden="true"><i></i><i></i></span>Contabilidad Administrativa</a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="#teoria">Teoría</a>
+      <a href="#herramientas">Herramientas</a>
+      <a href="#autoevaluacion">Autoevaluación</a>
+      <a href="#fundamentos">Sobre la página</a>
+      <a href="#referencias">Referencias</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Contabilidad II · Universidad Mariano Gálvez de Guatemala</p>
+      <h1>Contabilidad Administrativa</h1>
+      <p class="lead">Así usan los números las empresas guatemaltecas para tomar decisiones. Aquí encuentras qué es la contabilidad administrativa, en qué se diferencia de la financiera y de la de costos, y cómo se aplican herramientas como el VAN y la TIR, con ejemplos en quetzales.</p>
+      <div class="cta">
+        <a class="btn primary" href="#herramientas">Probar las calculadoras</a>
+        <a class="btn ghost" href="#teoria">Leer la teoría</a>
+      </div>
+    </div>
+    <figure class="hero-art" style="margin:0"><svg class="art" viewBox="0 0 420 270" role="img" aria-label="Ilustración de un tablero con gráficas y monedas"><rect width="420" height="270" rx="16" fill="#EEF3FC"/><rect x="30" y="34" width="250" height="190" rx="14" fill="#fff" stroke="#CFD7E8" stroke-width="2"/><rect x="30" y="34" width="250" height="30" rx="14" fill="#0B3A8C"/><circle cx="50" cy="49" r="5" fill="#fff"/><circle cx="68" cy="49" r="5" fill="#fff" opacity=".6"/>
+<rect x="55" y="150" width="30" height="50" rx="4" fill="#2A62C9"/><rect x="100" y="125" width="30" height="75" rx="4" fill="#2A62C9"/><rect x="145" y="105" width="30" height="95" rx="4" fill="#0B3A8C"/><rect x="190" y="82" width="30" height="118" rx="4" fill="#0B3A8C"/><rect x="235" y="95" width="30" height="105" rx="4" fill="#2A62C9"/>
+<path d="M45 140 105 112 160 95 205 70 255 80" fill="none" stroke="#C8102E" stroke-width="4" stroke-linecap="round"/>
+<g fill="#D98A1F" stroke="#fff" stroke-width="3"><circle cx="338" cy="225" r="38"/><circle cx="338" cy="185" r="38" fill="#E8A53A"/></g><text x="338" y="198" text-anchor="middle" font-size="40" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">Q</text>
+<rect x="300" y="64" width="90" height="62" rx="12" fill="#C8102E"/><text x="345" y="92" text-anchor="middle" font-size="13" fill="#fff" font-family="Inter,sans-serif">VAN</text><text x="345" y="113" text-anchor="middle" font-size="18" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">+ Q</text></svg></figure>
+  </div>
+</div>
+<div class="tzute" aria-hidden="true"></div>
+
+<!-- TEORÍA -->
+<section class="band" id="teoria">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Teoría</p>
+      <h2>Tres contabilidades, tres propósitos</h2>
+      <p>Una empresa registra lo que le pasa una sola vez, pero lo presenta de forma distinta según quién lo necesita y para qué.</p>
+    </div>
+
+    <div class="banner"><svg class="art" viewBox="0 0 720 150" role="img" aria-label="Ilustración de las tres contabilidades"><rect width="720" height="150" rx="16" fill="#EEF3FC"/><rect x="10" y="8" width="220" height="134" rx="14" fill="#EEF3FC"/><rect x="72" y="22" width="64" height="76" rx="6" fill="#fff" stroke="#0B3A8C" stroke-width="3"/><path d="M84 42h40M84 56h40M84 70h28" stroke="#2A62C9" stroke-width="4" stroke-linecap="round"/><circle cx="146" cy="84" r="20" fill="#C8102E"/><path d="M137 84l6 6 11-12" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="120" y="128" text-anchor="middle" font-size="15" font-weight="700" fill="#0B3A8C" font-family="Space Grotesk,sans-serif">Financiera: informa a terceros</text><rect x="250" y="8" width="220" height="134" rx="14" fill="#EEF3FC"/><rect x="290" y="22" width="0" height="0"/><rect x="304" y="62" width="22" height="36" rx="3" fill="#2A62C9"/><rect x="334" y="46" width="22" height="52" rx="3" fill="#0B3A8C"/><rect x="364" y="30" width="22" height="68" rx="3" fill="#2A62C9"/><path d="M300 56 340 40 372 24" stroke="#C8102E" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="400" cy="38" r="12" fill="#D98A1F"/><text x="360" y="128" text-anchor="middle" font-size="15" font-weight="700" fill="#0B3A8C" font-family="Space Grotesk,sans-serif">Administrativa: ayuda a decidir</text><rect x="490" y="8" width="220" height="134" rx="14" fill="#EEF3FC"/><rect x="548" y="60" width="44" height="38" rx="4" fill="#D98A1F"/><rect x="598" y="60" width="44" height="38" rx="4" fill="#D98A1F"/><rect x="573" y="22" width="44" height="38" rx="4" fill="#0B3A8C"/><path d="M548 79h44M598 79h44M573 41h44" stroke="#fff" stroke-width="3" opacity=".6"/><text x="600" y="128" text-anchor="middle" font-size="15" font-weight="700" fill="#0B3A8C" font-family="Space Grotesk,sans-serif">De costos: mide lo que cuesta</text></svg></div>
+    <div class="cols">
+      <article class="card">
+        <h3>¿Qué es la contabilidad administrativa?</h3>
+        <p>Es la información que la gerencia usa para <strong>planear, controlar y decidir</strong>. También se le llama contabilidad gerencial o de gestión. No se hace para cumplir con un requisito legal, sino para responder preguntas del negocio.</p>
+        <ul class="bullets">
+          <li>La usan los gerentes y jefes de área, no el público externo.</li>
+          <li>Mira hacia adelante: presupuestos, proyecciones y escenarios.</li>
+          <li>No tiene un formato obligatorio; cada empresa arma los reportes que necesita.</li>
+          <li>Separa los resultados por producto, cliente, sucursal o proyecto.</li>
+          <li>Además de quetzales, usa datos como unidades vendidas, horas de trabajo o tiempos de entrega.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Objetivos</h3>
+        <ul class="bullets">
+          <li><strong>Planear:</strong> fijar metas y convertirlas en presupuestos.</li>
+          <li><strong>Controlar:</strong> comparar lo que pasó con lo presupuestado y explicar las diferencias.</li>
+          <li><strong>Decidir:</strong> mostrar los costos e ingresos que cambian según la opción elegida.</li>
+          <li><strong>Evaluar:</strong> medir cómo le va a cada área o sucursal.</li>
+          <li><strong>Comunicar:</strong> entregar la información clara y a tiempo.</li>
+        </ul>
+        <h4 style="margin-top:1.3rem">¿Por qué importa?</h4>
+        <p style="margin:0">Decidir sin datos sale caro. Con buena información, un gerente sabe a qué precio vender, cuánto comprar o si le conviene invertir en un equipo nuevo.</p>
+      </article>
+    </div>
+
+    <h3 class="sub-title">Comparación entre las tres</h3>
+    <div class="tablewrap" tabindex="0" aria-label="Tabla comparativa, se desplaza horizontalmente en pantallas pequeñas">
+      <table>
+        <thead><tr><th scope="col">Aspecto</th><th scope="col">Financiera</th><th scope="col">Administrativa</th><th scope="col">De costos</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">¿Para quién?</th><td>Personas externas: accionistas, bancos, proveedores y la SAT.</td><td>Personas internas: gerencia y jefes de área.</td><td>Gerencia y contabilidad financiera.</td></tr>
+          <tr><th scope="row">¿Para qué?</th><td>Rendir cuentas y mostrar la situación y los resultados de la empresa.</td><td>Planear, controlar y tomar decisiones.</td><td>Saber cuánto cuesta producir un bien o prestar un servicio.</td></tr>
+          <tr><th scope="row">¿Hacia cuándo mira?</th><td>Hacia el pasado: lo que ya ocurrió.</td><td>Hacia el presente y el futuro.</td><td>Pasado y futuro: costos reales y presupuestados.</td></tr>
+          <tr><th scope="row">¿Qué abarca?</th><td>La empresa completa.</td><td>Partes de la empresa: productos, clientes, sucursales.</td><td>Productos, órdenes de trabajo y procesos.</td></tr>
+          <tr><th scope="row">Reglas</th><td>Normas contables (NIIF) y leyes del país. El formato es obligatorio.</td><td>No hay norma obligatoria; la define cada empresa.</td><td>Sin norma para uso interno; al valuar inventarios sigue las normas contables.</td></tr>
+          <tr><th scope="row">Informes</th><td>Balance general, estado de resultados, flujo de efectivo y cambios en el patrimonio.</td><td>Presupuestos, análisis de variaciones, rentabilidad y evaluación de inversiones.</td><td>Hojas de costos y estado de costo de producción.</td></tr>
+          <tr><th scope="row">¿Cada cuánto?</th><td>Mensual, trimestral y anual.</td><td>Cuando se necesite: diario, semanal o mensual.</td><td>Por orden, por lote o por período.</td></tr>
+          <tr><th scope="row">Lo más importante</th><td>Que la información sea verificable.</td><td>Que sea útil y llegue a tiempo.</td><td>Que los costos se asignen con exactitud.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="gt"><b>En Guatemala</b>El Código de Comercio obliga a los comerciantes a llevar contabilidad. Los estados financieros respaldan la declaración del ISR ante la SAT y las solicitudes de crédito en los bancos. La contabilidad administrativa, en cambio, es voluntaria: la empresa la usa porque le ayuda a decidir mejor.</div>
+
+    <h3 class="sub-title">Decisiones de una empresa guatemalteca</h3>
+    <dl class="ledger">
+      <div class="r"><dt>¿Tendremos efectivo para el bono 14 y el aguinaldo?</dt><dd>Una distribuidora de abarrotes sabe que en julio y diciembre tiene pagos grandes de personal. Debe planear la caja con tiempo.<span class="go">Herramienta: flujo de efectivo</span></dd></div>
+      <div class="r"><dt>¿Fabricamos las gavetas o las compramos?</dt><dd>Una mueblería de Quetzaltenango compara el costo de hacerlas en su taller contra el precio de un proveedor.<span class="go">Herramienta: comprar o producir</span></dd></div>
+      <div class="r"><dt>¿Vale la pena comprar un horno nuevo?</dt><dd>Una panadería evalúa si lo que ganará con el horno compensa los Q 100,000 de inversión.<span class="go">Herramienta: VAN y TIR</span></dd></div>
+      <div class="r"><dt>¿Qué tan bien estamos ganando?</dt><dd>El dueño quiere saber cuánto deja cada quetzal vendido y cuánto rinde el dinero invertido en el negocio.<span class="go">Herramienta: rentabilidad y eficiencia</span></dd></div>
+      <div class="r"><dt>¿Estamos muy endeudados?</dt><dd>Antes de pedir otro préstamo, la gerencia revisa si el negocio puede pagar sus deudas de corto plazo.<span class="go">Herramienta: análisis patrimonial</span></dd></div>
+    </dl>
+
+    <h3 class="sub-title">Costos que hay que conocer</h3>
+    <div class="cols">
+      <div class="card"><h4>Por lo que se consume</h4><ul class="bullets"><li><strong>Materia prima directa:</strong> la harina en una panadería.</li><li><strong>Mano de obra directa:</strong> el sueldo del panadero.</li><li><strong>Costos indirectos de fabricación (CIF):</strong> energía, alquiler del local, mantenimiento.</li></ul></div>
+      <div class="card"><h4>Por cómo se comportan</h4><ul class="bullets"><li><strong>Variables:</strong> suben con las unidades producidas.</li><li><strong>Fijos:</strong> no cambian aunque se produzca más o menos.</li><li><strong>Mixtos:</strong> tienen una parte fija y otra variable, como la factura de energía.</li></ul></div>
+      <div class="card"><h4>Por su importancia al decidir</h4><ul class="bullets"><li><strong>Relevantes:</strong> son futuros y cambian entre opciones.</li><li><strong>Hundidos:</strong> ya se pagaron y no se recuperan.</li><li><strong>De oportunidad:</strong> lo que se deja de ganar al elegir una opción.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- HERRAMIENTAS -->
+<section class="band alt" id="herramientas">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Herramientas de gestión</p>
+      <h2>Cinco herramientas para decidir mejor</h2>
+      <p>Elige una pestaña, lee cómo funciona y cambia los datos de la calculadora para ver qué pasa. Las empresas y los montos son de ejemplo.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Herramientas">
+      <button role="tab" id="t-rent" aria-controls="p-rent" aria-selected="true">Rentabilidad y eficiencia</button>
+      <button role="tab" id="t-flujo" aria-controls="p-flujo" aria-selected="false" tabindex="-1">Flujo de efectivo</button>
+      <button role="tab" id="t-cp" aria-controls="p-cp" aria-selected="false" tabindex="-1">Comprar o producir</button>
+      <button role="tab" id="t-pat" aria-controls="p-pat" aria-selected="false" tabindex="-1">Análisis patrimonial</button>
+      <button role="tab" id="t-van" aria-controls="p-van" aria-selected="false" tabindex="-1">VAN y TIR</button>
+    </div>
+
+    <!-- Rentabilidad -->
+    <div role="tabpanel" id="p-rent" aria-labelledby="t-rent" class="tool">
+      <div class="explain">
+        <svg class="art" viewBox="0 0 360 170" role="img" aria-label="Ilustración de barras y un porcentaje"><rect width="360" height="170" rx="16" fill="#EEF3FC"/><path d="M30 140H270" stroke="#0B1630" stroke-width="2"/><rect x="50" y="95" width="36" height="45" rx="4" fill="#2A62C9"/><rect x="100" y="72" width="36" height="68" rx="4" fill="#2A62C9"/><rect x="150" y="48" width="36" height="92" rx="4" fill="#0B3A8C"/><rect x="200" y="26" width="36" height="114" rx="4" fill="#0B3A8C"/><circle cx="310" cy="62" r="34" fill="#C8102E"/><text x="310" y="75" text-anchor="middle" font-size="38" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">%</text></svg>
+        <h3>Rentabilidad y eficiencia</h3>
+        <p>La <strong>rentabilidad</strong> dice cuánto gana la empresa con sus ventas y con el dinero invertido. La <strong>eficiencia</strong> dice qué tan bien aprovecha sus recursos para vender, cobrar y mover el inventario.</p>
+        <div class="formula">Margen bruto  = (Ventas − Costo de ventas) ÷ Ventas
+Margen neto   = Utilidad neta ÷ Ventas
+ROA           = Utilidad neta ÷ Activos totales
+ROE           = Utilidad neta ÷ Patrimonio
+Rotación act. = Ventas ÷ Activos totales
+DuPont        = Margen neto × Rotación × (Activos ÷ Patrimonio)</div>
+        <h4>Cómo leerlos</h4>
+        <ul class="bullets">
+          <li>Un margen alto indica buen precio de venta o buen control de costos.</li>
+          <li>El ROA muestra cuánto rinden los activos, sin importar de dónde salió el dinero.</li>
+          <li>El ROE muestra el rendimiento para los dueños. Si es mayor que el ROA, la deuda está ayudando.</li>
+          <li>El análisis DuPont divide el ROE en tres partes para ver de dónde viene el resultado.</li>
+          <li>Menos días de inventario y de cobro significan que el dinero regresa más rápido a la empresa.</li>
+        </ul>
+      </div>
+      <div class="calc">
+        <h4>Calculadora interactiva</h4>
+        <p class="case"><b>Caso:</b> Distribuidora Los Cuchumatanes, S. A., que vende abarrotes en Huehuetenango.</p>
+        <div class="fields" id="f-rent"></div>
+        <div class="out" id="o-rent" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- Flujo -->
+    <div role="tabpanel" id="p-flujo" aria-labelledby="t-flujo" class="tool" hidden>
+      <div class="explain">
+        <svg class="art" viewBox="0 0 360 170" role="img" aria-label="Ilustración de monedas con flechas de entrada y salida"><rect width="360" height="170" rx="16" fill="#EEF3FC"/><g fill="#D98A1F" stroke="#fff" stroke-width="3"><ellipse cx="80" cy="128" rx="40" ry="12"/><ellipse cx="80" cy="108" rx="40" ry="12"/><ellipse cx="80" cy="88" rx="40" ry="12"/><ellipse cx="80" cy="68" rx="40" ry="12" fill="#E8A53A"/></g><path d="M150 55h120" stroke="#146B38" stroke-width="10" stroke-linecap="round"/><path d="M265 36l32 19-32 19z" fill="#146B38"/><path d="M300 115H180" stroke="#C8102E" stroke-width="10" stroke-linecap="round"/><path d="M185 96l-32 19 32 19z" fill="#C8102E"/><text x="215" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#146B38" font-family="Inter,sans-serif">Entra</text><text x="240" y="152" text-anchor="middle" font-size="14" font-weight="700" fill="#C8102E" font-family="Inter,sans-serif">Sale</text></svg>
+        <h3>Flujo de efectivo</h3>
+        <p>Ganar no es lo mismo que tener efectivo. Una empresa puede vender mucho y aun así quedarse sin caja si cobra tarde o hace grandes pagos al mismo tiempo. El flujo de efectivo muestra de dónde entra y a dónde sale el dinero.</p>
+        <div class="formula">Flujo neto  = Operación + Inversión + Financiamiento
+Saldo final = Saldo inicial + Flujo neto</div>
+        <h4>Las tres actividades</h4>
+        <ul class="bullets">
+          <li><strong>Operación:</strong> lo que se cobra a clientes menos lo que se paga a proveedores, personal y gastos. Debe ser positivo con el tiempo.</li>
+          <li><strong>Inversión:</strong> compra y venta de equipo, vehículos o inmuebles.</li>
+          <li><strong>Financiamiento:</strong> préstamos recibidos, pagos de deuda y retiros de los socios.</li>
+        </ul>
+        <div class="gt"><b>En Guatemala</b>El bono 14 se paga en julio y el aguinaldo entre diciembre y enero. Son pagos grandes que se deben planear. El IVA de 12 % que se cobra a los clientes y se entrega a la SAT también mueve la caja.</div>
+        <p class="note" style="margin-top:1rem">Aquí se usa el método directo (cobros y pagos). El indirecto parte de la utilidad y la ajusta.</p>
+      </div>
+      <div class="calc">
+        <h4>Calculadora interactiva</h4>
+        <p class="case"><b>Caso:</b> la misma distribuidora, durante un semestre.</p>
+        <div class="fields" id="f-flujo"></div>
+        <div class="out" id="o-flujo" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- Comprar o producir -->
+    <div role="tabpanel" id="p-cp" aria-labelledby="t-cp" class="tool" hidden>
+      <div class="explain">
+        <svg class="art" viewBox="0 0 360 170" role="img" aria-label="Ilustración de una fábrica y una caja"><rect width="360" height="170" rx="16" fill="#EEF3FC"/><path d="M30 140V82l38 22V82l38 22V82l38 22V50h30v90z" fill="#0B3A8C"/><g fill="#fff" opacity=".85"><rect x="46" y="116" width="14" height="14" rx="2"/><rect x="84" y="116" width="14" height="14" rx="2"/><rect x="122" y="116" width="14" height="14" rx="2"/></g><circle cx="165" cy="34" r="9" fill="#C9D4EE"/><circle cx="180" cy="22" r="7" fill="#C9D4EE"/><rect x="250" y="82" width="86" height="58" rx="5" fill="#D98A1F"/><rect x="282" y="82" width="22" height="58" fill="#fff" opacity=".6"/><path d="M215 112h28" stroke="#C8102E" stroke-width="6" stroke-linecap="round"/><path d="M240 100l14 12-14 12z" fill="#C8102E"/></svg>
+        <h3>Comprar o producir</h3>
+        <p>Cuando una empresa fabrica una pieza, puede preguntarse si le conviene seguir haciéndola o comprarla. Para decidir se comparan solo los <strong>costos relevantes</strong>: los que son futuros y cambian entre una opción y otra.</p>
+        <div class="formula">Costo de producir = Unidades × Costo variable unitario
+                    + Costos fijos evitables
+Costo de comprar  = Unidades × Precio de compra
+                    − Ingreso por uso alterno de la capacidad
+Punto de indiferencia = (Fijos evitables + Ingreso alterno)
+                        ÷ (Precio de compra − Costo variable)</div>
+        <h4>Cómo leerlo</h4>
+        <ul class="bullets">
+          <li>Un costo fijo que se paga igual en las dos opciones no cuenta. Es irrelevante.</li>
+          <li>Si el espacio o la maquinaria liberada pueden generar otro ingreso, ese ingreso es un costo de oportunidad de seguir produciendo.</li>
+          <li>Si se necesitan menos unidades que el punto de indiferencia, conviene comprar. Si se necesitan más, conviene producir.</li>
+          <li>Las cifras no son todo: también pesan la calidad, la puntualidad del proveedor y el control del proceso.</li>
+        </ul>
+      </div>
+      <div class="calc">
+        <h4>Calculadora interactiva</h4>
+        <p class="case"><b>Caso:</b> Mueblería Xelajú, S. A., en Quetzaltenango, decide si fabrica o compra las gavetas de sus escritorios.</p>
+        <div class="fields" id="f-cp"></div>
+        <div class="out" id="o-cp" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- Patrimonial -->
+    <div role="tabpanel" id="p-pat" aria-labelledby="t-pat" class="tool" hidden>
+      <div class="explain">
+        <svg class="art" viewBox="0 0 360 170" role="img" aria-label="Ilustración de una balanza"><rect width="360" height="170" rx="16" fill="#EEF3FC"/><rect x="176" y="34" width="8" height="100" rx="3" fill="#0B3A8C"/><rect x="136" y="132" width="88" height="10" rx="4" fill="#0B3A8C"/><path d="M62 50h236" stroke="#0B3A8C" stroke-width="7" stroke-linecap="round"/><path d="M62 50 40 100M62 50 84 100M298 50 276 100M298 50 320 100" stroke="#0B1630" stroke-width="2"/><path d="M28 100h68q-4 26-34 26t-34-26z" fill="#2A62C9"/><path d="M264 100h68q-4 26-34 26t-34-26z" fill="#C8102E"/><text x="62" y="152" text-anchor="middle" font-size="13" font-weight="700" fill="#0B3A8C" font-family="Inter,sans-serif">Activo</text><text x="298" y="152" text-anchor="middle" font-size="13" font-weight="700" fill="#C8102E" font-family="Inter,sans-serif">Pasivo + Patrimonio</text></svg>
+        <h3>Análisis patrimonial</h3>
+        <p>Revisa cómo está armado el balance general: qué tiene la empresa (activos), qué debe (pasivos) y qué es de los dueños (patrimonio). Así se ve si puede pagar sus deudas y cuánto depende de los préstamos.</p>
+        <div class="formula">Activo = Pasivo + Patrimonio
+Capital de trabajo = Activo corriente − Pasivo corriente
+Liquidez corriente = Activo corriente ÷ Pasivo corriente
+Prueba ácida      = (Activo corriente − Inventarios) ÷ Pasivo corriente
+Endeudamiento     = Pasivo total ÷ Activo total
+Autonomía         = Patrimonio ÷ Activo total</div>
+        <h4>Cómo leerlo</h4>
+        <ul class="bullets">
+          <li>Una liquidez corriente mayor que 1 significa que lo que se tiene a corto plazo cubre lo que se debe a corto plazo.</li>
+          <li>La prueba ácida es más estricta porque no cuenta el inventario, que tarda en convertirse en efectivo.</li>
+          <li>Con mucho endeudamiento hay más riesgo; con poco, los dueños respaldan más el negocio.</li>
+          <li>Los valores ideales cambian según el tipo de negocio, así que conviene comparar con empresas parecidas.</li>
+        </ul>
+      </div>
+      <div class="calc">
+        <h4>Calculadora interactiva</h4>
+        <p class="case"><b>Caso:</b> Distribuidora Los Cuchumatanes, S. A., al cierre del año.</p>
+        <div class="fields" id="f-pat"></div>
+        <div class="out" id="o-pat" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- VAN y TIR -->
+    <div role="tabpanel" id="p-van" aria-labelledby="t-van" class="tool" hidden>
+      <div class="explain">
+        <svg class="art" viewBox="0 0 360 170" role="img" aria-label="Ilustración de un horno y una curva de crecimiento"><rect width="360" height="170" rx="16" fill="#EEF3FC"/><rect x="30" y="40" width="130" height="100" rx="12" fill="#0B3A8C"/><rect x="48" y="68" width="94" height="56" rx="8" fill="#D98A1F"/><rect x="58" y="78" width="74" height="36" rx="5" fill="#F6C56B"/><g fill="#fff"><circle cx="55" cy="54" r="5"/><circle cx="75" cy="54" r="5"/><circle cx="95" cy="54" r="5"/></g><path d="M195 140H335M195 140V30" stroke="#0B1630" stroke-width="2"/><path d="M200 128C240 124 262 92 326 40" fill="none" stroke="#146B38" stroke-width="5" stroke-linecap="round"/><circle cx="326" cy="40" r="8" fill="#C8102E"/><text x="262" y="156" text-anchor="middle" font-size="13" font-weight="700" fill="#0B3A8C" font-family="Inter,sans-serif">VAN y TIR</text></svg>
+        <h3>VAN y TIR</h3>
+        <p>Sirven para decidir si un proyecto de inversión vale la pena. Parten de una idea simple: <strong>un quetzal hoy vale más que un quetzal dentro de un año</strong>, por eso los flujos futuros se descuentan.</p>
+        <div class="formula">VAN = −Inversión + Σ [ Flujo(t) ÷ (1 + k)^t ]
+TIR = la tasa k que hace VAN = 0
+Índice de rentabilidad = VP de los flujos ÷ Inversión</div>
+        <h4>Cuándo aceptar un proyecto</h4>
+        <ul class="bullets">
+          <li><strong>VAN mayor que 0:</strong> el proyecto rinde más de lo que se exige. Se acepta.</li>
+          <li><strong>VAN igual a 0:</strong> rinde justo lo que se exige. Da lo mismo.</li>
+          <li><strong>VAN menor que 0:</strong> rinde menos de lo que se exige. Se rechaza.</li>
+          <li><strong>TIR mayor que k:</strong> también se acepta. La TIR es el rendimiento anual del proyecto y k es lo mínimo que la empresa espera ganar. Suele partir del costo del préstamo o de lo que rendiría el dinero en otra inversión.</li>
+        </ul>
+        <h4>Ojo con</h4>
+        <p class="note" style="margin:0">Si los flujos cambian de signo varias veces, puede haber más de una TIR. Y para comparar proyectos de distinto tamaño, el VAN es más confiable.</p>
+      </div>
+      <div class="calc">
+        <h4>Calculadora interactiva</h4>
+        <p class="case"><b>Caso:</b> Panadería El Fogón, en Quetzaltenango, evalúa comprar un horno industrial.</p>
+        <div class="fields" id="f-van"></div>
+        <p class="sub">Dinero extra que dejaría el horno cada año</p>
+        <div class="fields" id="cf-list"></div>
+        <div class="row-btns">
+          <button class="btn line" id="cf-add" type="button">Agregar año</button>
+          <button class="btn line" id="cf-del" type="button">Quitar último año</button>
+        </div>
+        <div class="out" id="o-van" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUTOEVALUACIÓN -->
+<section class="band alt" id="autoevaluacion">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Autoevaluación</p>
+      <h2>¿Qué tanto aprendí?</h2>
+      <p>Aunque no se pidió en el proyecto, esta autoevaluación me sirve para estudiar. Son 20 preguntas; después de cada respuesta veo la explicación y las opciones cambian de orden cada vez.</p>
+    </div>
+    <div class="card q-card" id="quiz"></div>
+  </div>
+</section>
+
+<!-- SOBRE LA PÁGINA -->
+<section class="band" id="fundamentos">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Sobre la página</p>
+      <h2>Cómo está hecha</h2>
+    </div>
+    <dl class="ledger">
+      <div class="r"><dt>Navegación</dt><dd>Un menú fijo en la parte de arriba lleva a cada sección. Se avanza de la teoría a la práctica.</dd></div>
+      <div class="r"><dt>Diseño</dt><dd>Fondo blanco, colores de la UMG, letra grande y clara, ilustraciones y cifras en tipografía de ancho fijo para que las columnas se alineen.</dd></div>
+      <div class="r"><dt>Adaptable</dt><dd>Se ve bien en computadora, tableta y celular.</dd></div>
+      <div class="r"><dt>Interactiva</dt><dd>Cinco calculadoras con ejemplos guatemaltecos que se actualizan al cambiar los datos, ilustraciones y una autoevaluación de 20 preguntas.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- REFERENCIAS -->
+<section class="band alt" id="referencias">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Referencias</p>
+      <h2>Para profundizar</h2>
+      <p>Me basé en estos libros y páginas como material adicional a lo que nos enseñaron en clase. En el curso no usamos ningún libro, así que esta consulta la hice por mi cuenta.</p>
+    </div>
+    <ul class="refs">
+      <li>Garrison, R. H., Noreen, E. W. y Brewer, P. C. <em>Contabilidad administrativa.</em> McGraw-Hill.</li>
+      <li>Horngren, C. T., Datar, S. M. y Rajan, M. V. <em>Contabilidad de costos: un enfoque gerencial.</em> Pearson.</li>
+      <li>Ramírez Padilla, D. N. <em>Contabilidad administrativa.</em> McGraw-Hill.</li>
+      <li>Gitman, L. J. y Zutter, C. J. <em>Principios de administración financiera.</em> Pearson.</li>
+      <li>Fundación IFRS. <em>NIC 7, Estado de flujos de efectivo.</em></li>
+      <li>Superintendencia de Administración Tributaria (SAT) de Guatemala. <em>Información sobre ISR e IVA.</em> sat.gob.gt</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<div class="tzute" aria-hidden="true"></div>
+<footer>
+  <div class="wrap">
+    <p style="margin:0 0 .3rem"><strong>Proyecto final individual · Contabilidad II (Contabilidad Administrativa)</strong></p>
+    <p style="margin:0">Elaborado por: José María Rodas Marroquín · Carné 2590-26-3281 · Universidad Mariano Gálvez de Guatemala · Guatemala, 2026</p>
+    <p style="margin:.6rem 0 0">Las empresas y los montos de las calculadoras son ejemplos para fines académicos.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+var LOC='es-GT';
+function fmtQ(n){if(!isFinite(n))return '—';var a=Math.round(Math.abs(n)).toLocaleString(LOC);return (n<0&&Math.round(n)!==0?'−':'')+'Q '+a}
+function fmtP(x,d){if(!isFinite(x))return '—';d=d==null?1:d;return (x*100).toLocaleString(LOC,{minimumFractionDigits:d,maximumFractionDigits:d})+' %'}
+function fmtX(x){return isFinite(x)?x.toLocaleString(LOC,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}
+function fmtN(x,d){return isFinite(x)?x.toLocaleString(LOC,{maximumFractionDigits:d==null?0:d}):'—'}
+function num(id){var v=parseFloat($(id).value);return isFinite(v)?v:0}
+function kpi(l,v,s,c){return '<div class="kpi '+(c||'')+'"><span class="k-l">'+l+'</span><strong class="k-v">'+v+'</strong><span class="k-s">'+(s||'')+'</span></div>'}
+function pill(t,c){return '<span class="pill '+c+'">'+t+'</span>'}
+function fields(id,list){
+  $(id).innerHTML=list.map(function(f){
+    return '<div class="field"><label for="'+f.id+'">'+f.label+'</label><div class="inp"><span>'+(f.unit||'Q')+'</span><input id="'+f.id+'" type="number" inputmode="decimal" step="any" value="'+f.v+'"></div></div>';
+  }).join('');
+}
+function bind(id,fn){$(id).addEventListener('input',fn)}
+
+/* ---------- Pestañas ---------- */
+var tabs=[].slice.call(document.querySelectorAll('[role="tab"]'));
+function selectTab(t,focus){
+  tabs.forEach(function(x){
+    var on=x===t;
+    x.setAttribute('aria-selected',on?'true':'false');
+    x.tabIndex=on?0:-1;
+    $(x.getAttribute('aria-controls')).hidden=!on;
+  });
+  if(focus)t.focus();
+}
+tabs.forEach(function(t,i){
+  t.addEventListener('click',function(){selectTab(t)});
+  t.addEventListener('keydown',function(e){
+    var n=null;
+    if(e.key==='ArrowRight')n=tabs[(i+1)%tabs.length];
+    if(e.key==='ArrowLeft')n=tabs[(i-1+tabs.length)%tabs.length];
+    if(e.key==='Home')n=tabs[0];
+    if(e.key==='End')n=tabs[tabs.length-1];
+    if(n){e.preventDefault();selectTab(n,true)}
+  });
+});
+
+/* ---------- Rentabilidad y eficiencia ---------- */
+fields('f-rent',[
+  {id:'r-ventas',label:'Ventas del año',v:800000},
+  {id:'r-cv',label:'Costo de ventas',v:480000},
+  {id:'r-gop',label:'Gastos de operación',v:200000},
+  {id:'r-int',label:'Intereses de préstamos',v:20000},
+  {id:'r-isr',label:'ISR sobre utilidades',v:25,unit:'%'},
+  {id:'r-act',label:'Activos totales',v:600000},
+  {id:'r-pat',label:'Patrimonio',v:300000},
+  {id:'r-inv',label:'Inventarios',v:90000},
+  {id:'r-cxc',label:'Cuentas por cobrar',v:110000}
+]);
+function calcRent(){
+  var v=num('r-ventas'),cv=num('r-cv'),g=num('r-gop'),i=num('r-int'),t=num('r-isr')/100,A=num('r-act'),P=num('r-pat'),inv=num('r-inv'),cxc=num('r-cxc');
+  var bruta=v-cv,oper=bruta-g,uai=oper-i,isr=uai>0?uai*t:0,neta=uai-isr;
+  var mb=v?bruta/v:NaN,mo=v?oper/v:NaN,mn=v?neta/v:NaN,roa=A?neta/A:NaN,roe=P?neta/P:NaN,rot=A?v/A:NaN,mult=P?A/P:NaN;
+  var rinv=inv?cv/inv:NaN,dinv=rinv?365/rinv:NaN,dcob=v?cxc/v*365:NaN;
+  var cls=function(x){return x>0?'good':(x<0?'bad':'')};
+  var h='<div class="kpis">'+kpi('Utilidad neta',fmtQ(neta),'Después del ISR',cls(neta))+kpi('ROA',fmtP(roa),'Rinde sobre activos',cls(roa))+kpi('ROE',fmtP(roe),'Rinde para los dueños',cls(roe))+'</div>';
+  h+='<div class="tablewrap"><table class="mini"><thead><tr><th scope="col">Indicador</th><th scope="col">Resultado</th><th scope="col">Qué significa</th></tr></thead><tbody>';
+  var rows=[
+    ['Utilidad bruta',fmtQ(bruta),'Lo que queda después del costo de ventas'],
+    ['Utilidad operativa',fmtQ(oper),'Resultado del negocio antes de intereses e impuesto'],
+    ['Margen bruto',fmtP(mb),'De cada Q1 vendido, esto queda tras el costo de ventas'],
+    ['Margen operativo',fmtP(mo),'De cada Q1 vendido, esto deja la operación'],
+    ['Margen neto',fmtP(mn),'De cada Q1 vendido, esto queda al final'],
+    ['Rotación de activos',fmtX(rot)+' veces','Ventas que genera cada Q1 de activos'],
+    ['Rotación de inventarios',fmtX(rinv)+' veces','Veces que el inventario se vende en el año'],
+    ['Días de inventario',fmtN(dinv)+' días','Tiempo promedio que tarda en venderse'],
+    ['Días de cobro',fmtN(dcob)+' días','Tiempo promedio que tardan los clientes en pagar']
+  ];
+  rows.forEach(function(r){h+='<tr><th scope="row">'+r[0]+'</th><td class="m">'+r[1]+'</td><td>'+r[2]+'</td></tr>'});
+  h+='</tbody></table></div>';
+  h+='<p class="note" style="margin-top:.9rem"><strong>DuPont:</strong> ROE = margen neto × rotación × multiplicador = <span class="mono">'+fmtP(mn)+' × '+fmtX(rot)+' × '+fmtX(mult)+' = '+fmtP(mn*rot*mult)+'</span>. ';
+  h+=(isFinite(roe)&&isFinite(roa)&&roe>roa)?'El ROE es mayor que el ROA porque la deuda está ayudando a los dueños a ganar más.':'El ROE no supera al ROA, así que el financiamiento ajeno no está sumando rendimiento.';
+  h+=' El 25 % de ISR corresponde al régimen sobre las utilidades de actividades lucrativas; puedes cambiarlo.</p>';
+  $('o-rent').innerHTML=h;
+}
+bind('f-rent',calcRent);
+
+/* ---------- Flujo de efectivo ---------- */
+fields('f-flujo',[
+  {id:'x-ini',label:'Saldo inicial de caja',v:50000},
+  {id:'x-cob',label:'Cobros a clientes',v:620000},
+  {id:'x-prov',label:'Pagos a proveedores',v:380000},
+  {id:'x-gas',label:'Sueldos, bono 14 y gastos',v:150000},
+  {id:'x-comp',label:'Compra de equipo',v:60000},
+  {id:'x-vent',label:'Venta de equipo usado',v:10000},
+  {id:'x-prest',label:'Préstamos recibidos',v:40000},
+  {id:'x-pago',label:'Pagos de préstamos',v:30000},
+  {id:'x-div',label:'Retiros de los socios',v:20000}
+]);
+function calcFlujo(){
+  var op=num('x-cob')-num('x-prov')-num('x-gas');
+  var inv=num('x-vent')-num('x-comp');
+  var fin=num('x-prest')-num('x-pago')-num('x-div');
+  var neto=op+inv+fin,fin_=num('x-ini')+neto;
+  var max=Math.max(Math.abs(op),Math.abs(inv),Math.abs(fin),Math.abs(neto),1);
+  function bar(l,v){
+    var w=Math.abs(v)/max*50;
+    var st=v>=0?'left:50%;width:'+w+'%':'left:'+(50-w)+'%;width:'+w+'%';
+    return '<div class="bar-row"><span>'+l+'</span><div><div class="track"><span class="fill '+(v>=0?'pos':'neg')+'" style="'+st+'"></span></div><span class="bar-val">'+fmtQ(v)+'</span></div></div>';
+  }
+  var h='<div class="bars">'+bar('Operación',op)+bar('Inversión',inv)+bar('Financiamiento',fin)+bar('Flujo neto',neto)+'</div>';
+  h+='<div class="kpis">'+kpi('Saldo inicial',fmtQ(num('x-ini')),'')+kpi('Flujo neto',fmtQ(neto),'',neto>=0?'good':'bad')+kpi('Saldo final',fmtQ(fin_),'',fin_>=0?'good':'bad')+'</div>';
+  var msg,c;
+  if(fin_<0){c='bad';msg='<strong>Se queda sin efectivo</strong>La caja termina en negativo. Hace falta financiamiento o reducir pagos.'}
+  else if(op<0){c='warn';msg='<strong>La operación consume efectivo</strong>El negocio gasta más de lo que cobra. Si la caja no es negativa es por préstamos o ventas de equipo, y eso no se puede repetir siempre.'}
+  else if(neto<0){c='warn';msg='<strong>La caja bajó</strong>La operación genera efectivo, pero las inversiones o el pago de deudas lo superan. Conviene vigilar el saldo.'}
+  else{c='good';msg='<strong>Flujo sano</strong>La operación genera efectivo y la caja aumentó en el período.'}
+  h+='<div class="verdict '+c+'">'+msg+'</div>';
+  $('o-flujo').innerHTML=h;
+}
+bind('f-flujo',calcFlujo);
+
+/* ---------- Comprar o producir ---------- */
+var CP={u:10000,pc:45,mp:18,mod:10,civ:5,fev:60000,fne:80000,alt:0};
+fields('f-cp',[
+  {id:'c-u',label:'Gavetas por año',v:CP.u,unit:'u.'},
+  {id:'c-pc',label:'Precio del proveedor por unidad',v:CP.pc},
+  {id:'c-mp',label:'Madera y materiales por unidad',v:CP.mp},
+  {id:'c-mod',label:'Mano de obra directa por unidad',v:CP.mod},
+  {id:'c-civ',label:'CIF variable por unidad',v:CP.civ},
+  {id:'c-fev',label:'Costos fijos que se evitarían (total)',v:CP.fev},
+  {id:'c-fne',label:'Costos fijos que se pagan igual (total)',v:CP.fne},
+  {id:'c-alt',label:'Ingreso si se usa el espacio en otra cosa',v:CP.alt}
+]);
+function cpCalc(p){
+  var vu=p.mp+p.mod+p.civ,prod=p.u*vu+p.fev,comp=p.u*p.pc-p.alt;
+  var q=(p.pc-vu)>0?(p.fev+p.alt)/(p.pc-vu):NaN;
+  return {vu:vu,prod:prod,comp:comp,dif:comp-prod,q:q};
+}
+function calcCP(){
+  var p={u:num('c-u'),pc:num('c-pc'),mp:num('c-mp'),mod:num('c-mod'),civ:num('c-civ'),fev:num('c-fev'),fne:num('c-fne'),alt:num('c-alt')};
+  var r=cpCalc(p),best=r.dif>0?'producir':(r.dif<0?'comprar':'ind');
+  var h='<div class="kpis">'+kpi('Costo relevante de producir',fmtQ(r.prod),'')+kpi('Costo relevante de comprar',fmtQ(r.comp),'')+kpi('Ahorro',fmtQ(Math.abs(r.dif)),best==='ind'?'Da lo mismo':'Si se decide a favor de '+(best==='producir'?'producir':'comprar'),best==='ind'?'':'good')+'</div>';
+  var msg=best==='producir'?'<strong>Conviene producir</strong>Fabricar las gavetas cuesta '+fmtQ(r.dif)+' menos al año que comprarlas.':best==='comprar'?'<strong>Conviene comprar</strong>Comprar las gavetas cuesta '+fmtQ(-r.dif)+' menos al año que fabricarlas.':'<strong>Cuestan lo mismo</strong>Hay que decidir por calidad, puntualidad y control.';
+  h+='<div class="verdict '+(best==='ind'?'warn':'good')+'">'+msg+'</div>';
+  h+='<div class="tablewrap"><table class="mini"><thead><tr><th scope="col">Concepto</th><th scope="col">Producir</th><th scope="col">Comprar</th></tr></thead><tbody>';
+  h+='<tr><th scope="row">Madera y materiales</th><td class="m">'+fmtQ(p.u*p.mp)+'</td><td class="m">—</td></tr>';
+  h+='<tr><th scope="row">Mano de obra directa</th><td class="m">'+fmtQ(p.u*p.mod)+'</td><td class="m">—</td></tr>';
+  h+='<tr><th scope="row">CIF variable</th><td class="m">'+fmtQ(p.u*p.civ)+'</td><td class="m">—</td></tr>';
+  h+='<tr><th scope="row">Fijos que se evitarían</th><td class="m">'+fmtQ(p.fev)+'</td><td class="m">—</td></tr>';
+  h+='<tr><th scope="row">Compra al proveedor</th><td class="m">—</td><td class="m">'+fmtQ(p.u*p.pc)+'</td></tr>';
+  h+='<tr><th scope="row">Menos: ingreso alterno</th><td class="m">—</td><td class="m">'+fmtQ(-p.alt)+'</td></tr>';
+  h+='<tr><th scope="row">Fijos que se pagan igual (no cuentan)</th><td class="m">'+fmtQ(p.fne)+'</td><td class="m">'+fmtQ(p.fne)+'</td></tr>';
+  h+='<tr class="tot"><th scope="row">Total relevante</th><td class="m">'+fmtQ(r.prod)+'</td><td class="m">'+fmtQ(r.comp)+'</td></tr>';
+  h+='</tbody></table></div>';
+  h+='<p class="note" style="margin-top:.9rem">'+(isFinite(r.q)?'<strong>Punto de indiferencia:</strong> <span class="mono">'+fmtN(r.q)+' unidades</span>. Con menos unidades conviene comprar; con más, producir.':'El precio del proveedor es menor o igual al costo variable, así que comprar siempre sale más barato.')+' Los costos fijos que se pagan igual en ambas opciones no cambian la decisión.</p>';
+  $('o-cp').innerHTML=h;
+}
+bind('f-cp',calcCP);
+
+/* ---------- Análisis patrimonial ---------- */
+fields('f-pat',[
+  {id:'p-efe',label:'Efectivo y bancos',v:60000},
+  {id:'p-cxc',label:'Cuentas por cobrar',v:100000},
+  {id:'p-inv',label:'Inventarios',v:90000},
+  {id:'p-anc',label:'Activo no corriente',v:350000},
+  {id:'p-pc',label:'Pasivo corriente',v:120000},
+  {id:'p-pnc',label:'Pasivo no corriente',v:180000}
+]);
+function calcPat(){
+  var efe=num('p-efe'),cxc=num('p-cxc'),inv=num('p-inv'),anc=num('p-anc'),pc=num('p-pc'),pnc=num('p-pnc');
+  var ac=efe+cxc+inv,A=ac+anc,Pt=pc+pnc,pat=A-Pt;
+  var ct=ac-pc,lc=pc?ac/pc:NaN,pa=pc?(ac-inv)/pc:NaN,end=A?Pt/A:NaN,aut=A?pat/A:NaN,apal=pat?Pt/pat:NaN;
+  var h='<div class="kpis">'+kpi('Total activo',fmtQ(A),'')+kpi('Pasivo total',fmtQ(Pt),'')+kpi('Patrimonio',fmtQ(pat),'Activo − Pasivo',pat<0?'bad':'')+'</div>';
+  var segsA=[['Activo corriente',ac,'var(--blue)'],['Activo no corriente',anc,'var(--blue-2)']];
+  var segsF=[['Pasivo corriente',pc,'var(--accent)'],['Pasivo no corriente',pnc,'var(--amber)'],['Patrimonio',Math.max(pat,0),'var(--good)']];
+  function stack(title,segs){
+    var tot=segs.reduce(function(s,x){return s+Math.max(x[1],0)},0)||1;
+    return '<div class="sub" style="margin-top:.6rem">'+title+'</div><div class="stack" role="img" aria-label="'+title+'">'+segs.map(function(x){return '<i style="width:'+(Math.max(x[1],0)/tot*100)+'%;background:'+x[2]+'"></i>'}).join('')+'</div><div class="leg2">'+segs.map(function(x){return '<span><i style="background:'+x[2]+'"></i>'+x[0]+': '+fmtP(Math.max(x[1],0)/tot,0)+'</span>'}).join('')+'</div>';
+  }
+  h+=stack('Qué tiene la empresa',segsA)+stack('Cómo se financia',segsF);
+  if(pat<0)h+='<div class="verdict bad"><strong>Patrimonio negativo</strong>Las deudas son mayores que los activos. La empresa está en una situación de insolvencia.</div>';
+  var lcTxt=!isFinite(lc)?'—':lc>=1.5?pill('Holgada','good'):lc>=1?pill('Justa','warn'):pill('Riesgo de no poder pagar','bad');
+  var paTxt=!isFinite(pa)?'—':pa>=1?pill('Suficiente','good'):pill('Depende del inventario','warn');
+  var enTxt=!isFinite(end)?'—':end<=0.5?pill('Más capital propio','good'):pill('Más deuda','warn');
+  h+='<div class="tablewrap"><table class="mini"><thead><tr><th scope="col">Indicador</th><th scope="col">Resultado</th><th scope="col">Lectura</th></tr></thead><tbody>';
+  h+='<tr><th scope="row">Capital de trabajo</th><td class="m">'+fmtQ(ct)+'</td><td>'+(ct>=0?pill('Positivo','good'):pill('Negativo','bad'))+'</td></tr>';
+  h+='<tr><th scope="row">Liquidez corriente</th><td class="m">'+fmtX(lc)+'</td><td>'+lcTxt+'</td></tr>';
+  h+='<tr><th scope="row">Prueba ácida</th><td class="m">'+fmtX(pa)+'</td><td>'+paTxt+'</td></tr>';
+  h+='<tr><th scope="row">Endeudamiento</th><td class="m">'+fmtP(end)+'</td><td>'+enTxt+'</td></tr>';
+  h+='<tr><th scope="row">Autonomía</th><td class="m">'+fmtP(aut)+'</td><td>Parte de los activos que es de los dueños</td></tr>';
+  h+='<tr><th scope="row">Pasivo ÷ Patrimonio</th><td class="m">'+fmtX(apal)+'</td><td>Quetzales de deuda por cada Q1 propio</td></tr>';
+  h+='</tbody></table></div><p class="note" style="margin-top:.8rem">Las categorías son referencias generales y cambian según el tipo de negocio.</p>';
+  $('o-pat').innerHTML=h;
+}
+bind('f-pat',calcPat);
+
+/* ---------- VAN y TIR ---------- */
+var VAN={i0:100000,k:12,flows:[30000,40000,50000,40000]};
+var periods=VAN.flows.slice();
+fields('f-van',[
+  {id:'v-i0',label:'Costo del horno (inversión)',v:VAN.i0},
+  {id:'v-k',label:'Rendimiento mínimo esperado (k)',v:VAN.k,unit:'%'}
+]);
+function renderCF(){
+  $('cf-list').innerHTML=periods.map(function(v,i){
+    return '<div class="field"><label for="cf-'+i+'">Año '+(i+1)+'</label><div class="inp"><span>Q</span><input id="cf-'+i+'" data-i="'+i+'" type="number" inputmode="decimal" step="any" value="'+v+'"></div></div>';
+  }).join('');
+  $('cf-add').disabled=periods.length>=10;
+  $('cf-del').disabled=periods.length<=1;
+}
+function npv(r,i0,fl){var s=-i0;for(var i=0;i<fl.length;i++)s+=fl[i]/Math.pow(1+r,i+1);return s}
+function irr(i0,fl){
+  var step=0.005,prevR=-0.9,prevV=npv(prevR,i0,fl);
+  for(var n=1;n<=2180;n++){
+    var r=-0.9+n*step,v=npv(r,i0,fl);
+    if(prevV===0)return prevR;
+    if(prevV*v<0){
+      var lo=prevR,hi=r;
+      for(var k=0;k<80;k++){var m=(lo+hi)/2;if(npv(lo,i0,fl)*npv(m,i0,fl)<=0)hi=m;else lo=m}
+      return (lo+hi)/2;
+    }
+    prevR=r;prevV=v;
+  }
+  return null;
+}
+function nice(x){var e=Math.pow(10,Math.floor(Math.log10(x))),f=x/e;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*e}
+function cq(v){var a=Math.abs(v),s=v<0?'−':'';if(a>=1e6)return s+'Q '+(a/1e6).toLocaleString(LOC,{maximumFractionDigits:1})+' M';if(a>=1e3)return s+'Q '+(a/1e3).toLocaleString(LOC,{maximumFractionDigits:1})+' mil';return s+'Q '+Math.round(a)}
+function chartVan(i0,fl,k,tir,van){
+  var W=640,H=300,ml=80,mr=18,mt=16,mb=46;
+  var base=(tir!==null&&tir>0)?tir*1.6:0.5;
+  var xmax=Math.min(5,Math.max(base,k*1.6,0.2));
+  var xs=nice(xmax/5);xmax=xs*Math.ceil(xmax/xs-1e-9);
+  var pts=[],N=80,lo=0,hi=0;
+  for(var i=0;i<=N;i++){var r=xmax*i/N,v=npv(r,i0,fl);pts.push([r,v]);lo=Math.min(lo,v);hi=Math.max(hi,v)}
+  if(hi===lo)hi=lo+1;
+  var ys=nice((hi-lo)/4),ymin=Math.floor(lo/ys)*ys,ymax=Math.ceil(hi/ys)*ys;
+  if(ymax===ymin)ymax=ymin+ys;
+  function X(r){return ml+r/xmax*(W-ml-mr)}
+  function Y(v){return mt+(ymax-v)/(ymax-ymin)*(H-mt-mb)}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Curva del VAN según la tasa de descuento. Cruza el cero en la TIR.">';
+  for(var t=ymin;t<=ymax+ys/2;t+=ys){
+    s+='<line class="'+(Math.abs(t)<ys/1000?'zero':'grid')+'" x1="'+ml+'" x2="'+(W-mr)+'" y1="'+Y(t)+'" y2="'+Y(t)+'"/>';
+    s+='<text class="tk" x="'+(ml-8)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+cq(t)+'</text>';
+  }
+  for(var x=0;x<=xmax+xs/2;x+=xs){
+    s+='<line class="grid" x1="'+X(x)+'" x2="'+X(x)+'" y1="'+mt+'" y2="'+(H-mb)+'"/>';
+    s+='<text class="tk" x="'+X(x)+'" y="'+(H-mb+18)+'" text-anchor="middle">'+(x*100).toLocaleString(LOC,{maximumFractionDigits:1})+' %</text>';
+  }
+  s+='<text class="tk" x="'+((ml+W-mr)/2)+'" y="'+(H-6)+'" text-anchor="middle">Rendimiento mínimo esperado (k)</text>';
+  s+='<polyline class="curve" points="'+pts.map(function(p){return X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)}).join(' ')+'"/>';
+  if(tir!==null&&tir>=0&&tir<=xmax)s+='<circle class="m-t" cx="'+X(tir)+'" cy="'+Y(0)+'" r="6"/>';
+  if(k>=0&&k<=xmax)s+='<circle class="m-k" cx="'+X(k)+'" cy="'+Y(van)+'" r="6"/>';
+  s+='</svg>';
+  return '<div class="chart">'+s+'</div><div class="legend"><span><i style="background:var(--blue)"></i>VAN con el k que elegiste</span><span><i style="background:var(--red-text)"></i>TIR: donde el VAN llega a cero</span></div>';
+}
+function calcVan(){
+  var i0=num('v-i0'),k=num('v-k')/100,fl=periods.slice();
+  var van=npv(k,i0,fl),tir=irr(i0,fl);
+  var pv=fl.reduce(function(s,f,i){return s+f/Math.pow(1+k,i+1)},0);
+  var ir=i0>0?pv/i0:NaN;
+  var pb=null,acc=0;
+  if(i0>0){for(var i=0;i<fl.length;i++){if(fl[i]>0&&acc+fl[i]>=i0){pb=i+(i0-acc)/fl[i];break}acc+=fl[i]}}
+  var ok=van>0.5,eq=Math.abs(van)<=0.5;
+  var h='<div class="kpis">'+kpi('VAN',fmtQ(van),'Con k = '+fmtP(k),ok?'good':(eq?'':'bad'))+kpi('TIR',tir===null?'No existe':fmtP(tir),'Rendimiento anual',tir!==null&&tir>k?'good':(tir!==null?'bad':''))+kpi('Índice de rentabilidad',fmtX(ir),'Valor presente ÷ inversión')+kpi('Recuperación',pb===null?'No se recupera':fmtX(pb)+' años','Sin descontar')+'</div>';
+  var msg,c;
+  if(ok){c='good';msg='<strong>Conviene comprar el horno</strong>El VAN es positivo: el proyecto deja '+fmtQ(van)+' más de lo que se espera ganar con un k de '+fmtP(k)+'.'+(tir!==null?' Además, la TIR de '+fmtP(tir)+' es mayor que ese k.':'')}
+  else if(eq){c='warn';msg='<strong>Da lo mismo</strong>El VAN es casi cero: el proyecto rinde justo lo que se espera.'}
+  else{c='bad';msg='<strong>No conviene</strong>El VAN es negativo: con un k de '+fmtP(k)+' el proyecto pierde '+fmtQ(-van)+' de valor.'+(tir!==null?' La TIR de '+fmtP(tir)+' no alcanza el rendimiento esperado.':'')}
+  h+='<div class="verdict '+c+'">'+msg+'</div>';
+  if(tir===null)h+='<p class="note">No hay TIR porque el VAN nunca llega a cero: los flujos no cambian de signo en el rango analizado.</p>';
+  h+=chartVan(i0,fl,k,tir,van);
+  $('o-van').innerHTML=h;
+}
+renderCF();
+bind('f-van',calcVan);
+$('cf-list').addEventListener('input',function(e){
+  var i=e.target.getAttribute('data-i');
+  if(i!==null){var v=parseFloat(e.target.value);periods[+i]=isFinite(v)?v:0;calcVan()}
+});
+$('cf-add').addEventListener('click',function(){if(periods.length<10){periods.push(0);renderCF();calcVan()}});
+$('cf-del').addEventListener('click',function(){if(periods.length>1){periods.pop();renderCF();calcVan()}});
+
+/* ---------- Autoevaluación ---------- */
+var QS=[
+  {q:'¿Quién usa principalmente la información de la contabilidad administrativa?',o:['La SAT y los bancos','La gerencia de la empresa','Los proveedores','Los accionistas que no trabajan en la empresa'],a:1,e:'La contabilidad administrativa sirve a quienes dirigen la empresa para planear, controlar y decidir. A los usuarios externos se les atiende con la contabilidad financiera.'},
+  {q:'Una distribuidora quiere saber si tendrá efectivo para pagar el bono 14 en julio. ¿Qué herramienta le sirve más?',o:['El análisis del flujo de efectivo','El margen bruto','La TIR de un proyecto','La depreciación de un equipo'],a:0,e:'El flujo de efectivo muestra cuándo entra y sale el dinero, y permite prever si la caja alcanzará para pagos grandes como el bono 14 o el aguinaldo.'},
+  {q:'En una decisión de comprar o producir, ¿qué costo no cuenta?',o:['Los costos fijos que se evitarían al dejar de producir','Los materiales por unidad','Los costos fijos que se pagan igual en ambas opciones','El precio que cobra el proveedor'],a:2,e:'Un costo que no cambia entre las opciones no influye en la decisión. Los fijos que se pagan siempre son irrelevantes.'},
+  {q:'Un proyecto tiene VAN positivo. ¿Qué significa?',o:['Rinde menos de lo que se espera','Rinde justo lo que se espera','Rinde más de lo que se espera y conviene aceptarlo','No se puede calcular su TIR'],a:2,e:'Con VAN mayor que cero, el valor de los flujos futuros supera la inversión, así que el proyecto rinde más que el mínimo esperado.'},
+  {q:'La Tasa Interna de Retorno (TIR) es la tasa que…',o:['Hace que el VAN sea igual a cero','Cobra el banco por un préstamo','Equivale a la inflación del año','Duplica la inversión inicial'],a:0,e:'La TIR es la tasa de descuento con la que el valor presente de los flujos iguala a la inversión, es decir, con la que el VAN es cero.'},
+  {q:'¿Qué no cuenta la prueba ácida, a diferencia de la liquidez corriente?',o:['El efectivo','Las cuentas por cobrar','Los inventarios','El pasivo corriente'],a:2,e:'La prueba ácida resta los inventarios porque son lo más lento de convertir en efectivo.'}
+];
+
+function Q(q,o,a,e){return {q:q,o:o,a:a,e:e}}
+QS=QS.concat([
+Q('¿Cuál describe mejor a la contabilidad financiera?',['Mira al futuro y no tiene formato obligatorio','Informa a usuarios externos con normas como las NIIF','Calcula el costo de cada orden de trabajo','Sirve solo para fijar precios'],1,'La contabilidad financiera rinde cuentas a accionistas, bancos y la SAT, sigue normas y mira lo que ya ocurrió.'),
+Q('¿Para qué sirve principalmente la contabilidad de costos?',['Calcular cuánto cuesta producir un bien o prestar un servicio','Preparar la declaración del ISR','Medir la inflación del país','Registrar solo los sueldos'],0,'Su función es medir y asignar los costos de productos, órdenes y procesos, y alimenta a las otras dos contabilidades.'),
+Q('En una panadería, la harina que se gasta según los panes horneados es un costo…',['Fijo','Variable','Hundido','De oportunidad'],1,'Un costo variable sube o baja con las unidades producidas.'),
+Q('¿Qué es un costo hundido?',['Uno que ya se pagó y no se puede recuperar','Uno que cambia entre las opciones','Lo que se deja de ganar al elegir','Uno con parte fija y parte variable'],0,'Los costos hundidos ya ocurrieron y no cambian con la decisión, por eso no son relevantes.'),
+Q('¿Qué es el costo de oportunidad?',['El costo de la materia prima','Lo que se deja de ganar al elegir una opción en lugar de otra','Los intereses de un préstamo','La depreciación del equipo'],1,'Es el beneficio al que se renuncia al escoger una alternativa.'),
+Q('¿Cuál es la fórmula del margen bruto?',['(Ventas − Costo de ventas) ÷ Ventas','Utilidad neta ÷ Activos totales','Ventas ÷ Activos totales','Pasivo total ÷ Activo total'],0,'El margen bruto indica cuánto queda de cada quetzal vendido después de cubrir el costo de ventas.'),
+Q('Si el ROE es mayor que el ROA, ¿qué suele indicar?',['Que la empresa no tiene deudas','Que la deuda está ayudando a aumentar el rendimiento de los dueños','Que la empresa tiene pérdidas','Que la liquidez es muy baja'],1,'El financiamiento ajeno multiplica el rendimiento sobre el patrimonio cuando los activos rinden más de lo que cuesta la deuda.'),
+Q('El análisis DuPont descompone el ROE en…',['Margen neto, rotación de activos y multiplicador del capital','Ventas, costos y gastos','Activo corriente, pasivo corriente e inventarios','VAN, TIR y k'],0,'ROE = margen neto × rotación de activos × (activos ÷ patrimonio).'),
+Q('Si los días de cobro aumentan, ¿qué ocurre?',['El dinero regresa más rápido a la empresa','Los clientes tardan más en pagar y la caja se aprieta','Aumenta el margen bruto','Baja el endeudamiento'],1,'Más días de cobro significan que el dinero tarda más en volver a la caja.'),
+Q('¿En qué actividad del flujo de efectivo se registra la compra de equipo y vehículos?',['Operación','Inversión','Financiamiento','Patrimonio'],1,'La compra y venta de activos de largo plazo pertenece a la actividad de inversión.'),
+Q('Un préstamo recibido del banco se registra en el flujo de efectivo como actividad de…',['Operación','Inversión','Financiamiento','Ninguna de las anteriores'],2,'Los préstamos, sus pagos y los retiros de los socios son actividades de financiamiento.'),
+Q('Una liquidez corriente de 0.8 significa que…',['El activo corriente no alcanza para cubrir el pasivo corriente','Sobra mucho efectivo','La empresa no tiene deudas','El patrimonio es negativo'],0,'Con menos de 1, lo que se tiene a corto plazo es menor que lo que se debe a corto plazo.'),
+Q('Según la ecuación contable, el patrimonio es igual a…',['Activo + Pasivo','Activo − Pasivo','Pasivo − Activo','Ventas − Costos'],1,'Activo = Pasivo + Patrimonio, así que Patrimonio = Activo − Pasivo.'),
+Q('En comprar o producir, si se necesitan más unidades que el punto de indiferencia, conviene…',['Comprar','Producir','Da lo mismo','Cerrar el taller'],1,'Al crecer las unidades, el costo de comprar sube más rápido que el variable de producir, así que producir resulta más barato.')
+]);
+function order(n){var a=[],i,j,t;for(i=0;i<n;i++)a.push(i);for(i=n-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=a[i];a[i]=a[j];a[j]=t}return a}
+var qi=0,score=0,answered=false;
+function renderQ(){
+  var box=$('quiz');
+  if(qi>=QS.length){
+    box.innerHTML='<div class="q-top"><span>Resultado final</span></div><p class="q-text">Acerté '+score+' de '+QS.length+' preguntas.</p><p>'+(score===QS.length?'¡Excelente! Domino los conceptos clave.':score>=14?'Muy bien. Debo repasar las explicaciones de las que fallé.':'Me conviene repasar la teoría y probar otra vez las calculadoras.')+'</p><button class="btn primary" id="q-re" type="button">Intentar de nuevo</button>';
+    $('q-re').addEventListener('click',function(){qi=0;score=0;renderQ()});
+    return;
+  }
+  var q=QS[qi];answered=false;
+  box.innerHTML='<div class="q-top"><span>Pregunta '+(qi+1)+' de '+QS.length+'</span><span>Aciertos: '+score+'</span></div><div class="qbar"><i style="width:'+(qi/QS.length*100)+'%"></i></div><p class="q-text" id="q-t">'+q.q+'</p><div class="opts" role="group" aria-labelledby="q-t">'+order(q.o.length).map(function(i){return '<button type="button" class="opt" data-i="'+i+'">'+q.o[i]+'</button>'}).join('')+'</div><div class="q-fb" id="q-fb" aria-live="polite"></div><button class="btn primary" id="q-next" type="button" hidden>'+(qi===QS.length-1?'Ver resultado':'Siguiente pregunta')+'</button>';
+  [].slice.call(box.querySelectorAll('.opt')).forEach(function(b){
+    b.addEventListener('click',function(){
+      if(answered)return;answered=true;
+      var i=+b.getAttribute('data-i'),ok=i===q.a;
+      if(ok)score++;
+      [].slice.call(box.querySelectorAll('.opt')).forEach(function(x){var j=+x.getAttribute('data-i');x.disabled=true;if(j===q.a)x.classList.add('ok');else if(j===i)x.classList.add('no')});
+      $('q-fb').innerHTML=(ok?pill('Correcto','good'):pill('Incorrecto','bad'))+' '+q.e;
+      $('q-next').hidden=false;
+    });
+  });
+  $('q-next').addEventListener('click',function(){qi++;renderQ()});
+}
+
+calcRent();calcFlujo();calcCP();calcPat();calcVan();renderQ();
+})();
+</script>
+</body></html>
